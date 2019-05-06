@@ -24,7 +24,7 @@ def nodestree():
     repository = fbp.repository()
     node_specs = repository.get("nodespec")
 
-    for k, v in node_specs.iteritems():
+    for k, v in node_specs.items():
         _insert(tree, v)
     return jsonify(tree)
 
@@ -87,8 +87,8 @@ def nodes():
             return jsonify({}), 200, {'ContentType': 'application/json'}
 
         # Adding default output when it is not there
-        for k, v in node_specs.iteritems():
-            if not v["port"].has_key("output"):
+        for k, v in node_specs.items():
+            if "output" not in v["port"].keys():
                 v["port"]["output"] = list()
                 v["port"]["output"].append({"name": "out"})
 

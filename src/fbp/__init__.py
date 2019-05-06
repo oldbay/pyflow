@@ -2,9 +2,9 @@
 import json
 import time
 
-from node import Node
-from flow import Flow
-from repository import repository
+from fbp.node import Node
+from fbp.flow import Flow
+from fbp.repository import repository
 
 
 __version_info__ = (0, 0, 1)

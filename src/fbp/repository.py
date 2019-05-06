@@ -176,6 +176,6 @@ class repository(object):
         self.clean()
         with open(path, "r") as f:
             repo = json.loads(f.read())
-            for domain, domain_value in repo.iteritems():
-                for key, value in domain_value.iteritems():
+            for domain, domain_value in repo.items():
+                for key, value in domain_value.items():
                     self.register(domain, key, value)

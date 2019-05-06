@@ -3,7 +3,7 @@ from multiprocessing import Process, Manager
 from multiprocessing.managers import BaseManager
 import sys
 import json
-from node import Node
+from fbp.node import Node
 
 
 EXEC_MODE_BATCH = "batch"

@@ -5,14 +5,22 @@ import json
 
 # All Supported Types
 TYPES = dict()
-TYPES["Boolean"] = types.BooleanType
-TYPES["Int"] = types.IntType
-TYPES["Long"] = types.LongType
-TYPES["Float"] = types.FloatType
-TYPES["String"] = types.StringType
-TYPES["List"] = types.ListType
-TYPES["Json"] = types.DictType
+# TYPES["Boolean"] = types.BooleanType
+# TYPES["Int"] = types.IntType
+# TYPES["Long"] = types.LongType
+# TYPES["Float"] = types.FloatType
+# TYPES["String"] = types.StringType
+# TYPES["List"] = types.ListType
+# TYPES["Json"] = types.DictType
 
+
+TYPES["Boolean"] = bool
+TYPES["Int"] = int
+TYPES["Long"] = int
+TYPES["Float"] = float
+TYPES["String"] = bytes
+TYPES["List"] = list
+TYPES["Json"] = dict
 
 def c_int(val):
     return int(val)
