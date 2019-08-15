@@ -4,6 +4,8 @@ import traceback, pdb
 
 from fbp.port import Inport, Outport
 
+import inspect
+
 OUTPORT_DEFAULT_NAME = "out"
 
 STATUS_SUCCESS = "success"
@@ -12,7 +14,17 @@ STATUS_INIT = "init"
 STATUS_RUNNING = "running"
 
 
+import ast
+def is_valid_python(code):
+    try:
+        ast.parse(code)
+    except SyntaxError:
+        return False
+    return True
+
 class Node(object):
+
+    widgets = None
 
     def __init__(self, id, name, spec):
         self._id = id
@@ -21,8 +33,17 @@ class Node(object):
         self._port_spec = spec.get("port")
         # Tricky and Non-Secure eval
         func_ = locals()
-        exec(spec.get("func"), func_)
+        code = spec.get("func")
+        # code = code.replace('"', '\"')
+        if is_valid_python(code):
+            # exec(compile(ast.parse(spec.get("func")), "fakeobj", "exec"))
+            executed = exec(code, func_)
+            # target_func = [func_[x] for x in list(func_.keys()) if x == "func" and callable(func_[x])][0]
+        else:
+            raise SyntaxError("Not valid python code")
         self._func = func_["func"]
+        self._func = [func_[x] for x in list(func_.keys()) if x == "func" and callable(func_[x])][0]
+        self._all_functions = [func_["spec"][x] for x in list(func_["spec"].keys())]
 
         self._inputports = dict()
         self._outputports = dict()

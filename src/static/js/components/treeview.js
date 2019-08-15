@@ -13,10 +13,10 @@ define(["util"], function(Util) {
         _rendor("tree", tree);
     }
 
-    function _list2tree(nodes) {
+    function _list2tree(nodes, tree_id="pyflow", tree_title="pyflow") {
         var tree = [{
-            "title": "pyflow",
-            "id": "pyflow",
+            "title": tree_id,
+            "id": tree_title,
             "children": []
         }];
 

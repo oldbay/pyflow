@@ -29,14 +29,14 @@ def c_int(val):
 def c_bool(val):
     if type(val) is 'bool':
         return val
-    elif type(val) is str or unicode:
+    elif type(val) is str or bytes:
         return str(val).lower() in ["y", "true", "yes"]
     else:
         return False
 
 
 def c_long(val):
-    return long(val)
+    return int(val)
 
 
 def c_float(val):
@@ -50,7 +50,7 @@ def c_str(val):
 def c_list(val):
     if type(val) is list:
         return val
-    elif type(val) is str or unicode:
+    elif type(val) is str or bytes:
         return str(val).split(",")
     return []
 
@@ -58,7 +58,7 @@ def c_list(val):
 def c_json(val):
     if type(val) is dict:
         return val
-    elif type(val) is str or unicode:
+    elif type(val) is str or bytes:
         return json.loads(str(val))
     return {}
 

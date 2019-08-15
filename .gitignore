@@ -93,3 +93,6 @@ src/static/bower_components
 src/static/node_modules
 
 *repo.db
+
+#intellij files
+.idea/
