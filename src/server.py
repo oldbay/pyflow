@@ -1,13 +1,11 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
-
-import os
 import json
+import os
 
-import nodemaker
+from flask import Flask, jsonify, request
+
 import fbp
-
+import librarian
+import nodemaker
 from fbp.port import Port
 
 app = Flask(__name__, static_url_path="")
@@ -71,6 +69,19 @@ def _inset_node(parent, node, path):
                 parent["children"].append(item)
                 _inset_node(item, node, path[1:])
     return
+
+
+@app.route('/boxes', methods=['GET', 'POST'])
+def boxes_list():
+    """Boxes list resource endpoint"""
+    if request.method == 'POST':
+        result = librarian.install(request.json['packageName'], request.json['boxSpec'])
+        if result != 0:
+            return jsonify({'msg': 'Unable to install the package'}), 500
+        return jsonify({'msg': 'Box successfully created'}), 201
+
+    box_list = librarian.list_boxes()
+    return jsonify(box_list), 200
 
 
 @app.route("/nodes", methods=['GET', 'POST'])
