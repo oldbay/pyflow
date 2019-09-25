@@ -1,13 +1,12 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
-
-import os
 import json
+import os
+import subprocess
+import sys
 
-import nodemaker
+from flask import Flask, jsonify, request
+
 import fbp
-
+import nodemaker
 from fbp.port import Port
 
 app = Flask(__name__, static_url_path="")
@@ -71,6 +70,26 @@ def _inset_node(parent, node, path):
                 parent["children"].append(item)
                 _inset_node(item, node, path[1:])
     return
+
+
+@app.route('/packages', methods=['GET', 'POST'])
+def packages():
+    """Packages list resource endpoint"""
+    if request.method == 'POST':
+        package_name = request.json['packageName']
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', package_name])
+        except subprocess.CalledProcessError as exc:
+            return jsonify({'error': 'Pip failed with code {}'.format(exc.returncode)}), 500
+
+        return jsonify({'msg': 'Success'})
+
+    try:
+        reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze'])
+    except subprocess.CalledProcessError as exc:
+        return jsonify({'error': 'Pip failed with code {}!'.format(exc.returncode)}), 500
+
+    return jsonify({'freeze': reqs})
 
 
 @app.route("/nodes", methods=['GET', 'POST'])
