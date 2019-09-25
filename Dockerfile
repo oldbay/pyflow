@@ -25,6 +25,8 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
 WORKDIR /home
 COPY src/ pyflow/src/
 
+RUN python3 -m pip install --upgrade pip
+RUN pip config --global set global.extra-index-url https://artifacts.devogip.ru/artifactory/api/pypi/geo-pypi/simple
 WORKDIR /home/pyflow/src
 RUN python3 -m pip install -U flask
 WORKDIR /home/pyflow/src/static
