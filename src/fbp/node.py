@@ -1,10 +1,9 @@
 """Node Class for Flow."""
 
-import traceback, pdb
+import ast
+import traceback
 
 from fbp.port import Inport, Outport
-
-import inspect
 
 OUTPORT_DEFAULT_NAME = "out"
 
@@ -14,13 +13,13 @@ STATUS_INIT = "init"
 STATUS_RUNNING = "running"
 
 
-import ast
 def is_valid_python(code):
     try:
         ast.parse(code)
     except SyntaxError:
-        return False
+        raise
     return True
+
 
 class Node(object):
 
@@ -42,8 +41,13 @@ class Node(object):
         else:
             raise SyntaxError("Not valid python code")
         self._func = func_["func"]
-        self._func = [func_[x] for x in list(func_.keys()) if x == "func" and callable(func_[x])][0]
-        self._all_functions = [func_["spec"][x] for x in list(func_["spec"].keys())]
+        self._func = [
+            func_[x] for x in list(func_.keys())
+            if x == "func" and callable(func_[x])
+        ][0]
+        self._all_functions = [
+            func_["spec"][x] for x in list(func_["spec"].keys())
+        ]
 
         self._inputports = dict()
         self._outputports = dict()
@@ -62,7 +66,6 @@ class Node(object):
         return self._id
 
     def _initports(self):
-
         def _parse_in_port_port_spec(port_port_spec):
             name = port_port_spec.get("name")
 
@@ -80,7 +83,7 @@ class Node(object):
 
             try:
                 order = int(port_port_spec.get("order"))
-            except Exception as e:
+            except Exception:
                 order = 0
 
             return [name, ptype, default, required, order]
@@ -98,8 +101,8 @@ class Node(object):
         if input_ports:
             for p in input_ports:
                 port_info = _parse_in_port_port_spec(p)
-                in_port = Inport(port_info[0], port_info[1], port_info[
-                                 2], port_info[3], port_info[4])
+                in_port = Inport(port_info[0], port_info[1], port_info[2],
+                                 port_info[3], port_info[4])
                 self._inputports[in_port.name] = in_port
 
         output_ports = self._port_spec.get("output")
@@ -196,18 +199,20 @@ class Node(object):
         parameter_values = [(v.value, v.order)
                             for k, v in self._inputports.items()]
 
-        parameter_values = [v[0] for v in sorted(
-            parameter_values, key=lambda x: x[1])]  # sort by order
-        
+        parameter_values = [
+            v[0] for v in sorted(parameter_values, key=lambda x: x[1])
+        ]  # sort by order
+
         try:
             return_value = _function_wrapper(self._func, parameter_values)
-            
+
             self._is_cache_valid = True
             self._status = STATUS_SUCCESS
             self._error = None
 
             # Single output case
-            if OUTPORT_DEFAULT_NAME in self._outputports.keys() and len(self._outputports) == 1:
+            if OUTPORT_DEFAULT_NAME in self._outputports.keys() and len(
+                    self._outputports) == 1:
                 out_port = self._outputports.get(OUTPORT_DEFAULT_NAME)
                 out_port.value = return_value
                 return
