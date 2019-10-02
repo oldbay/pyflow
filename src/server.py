@@ -1,13 +1,12 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
-
-import os
 import json
+import os
+import subprocess
+import sys
 
-import nodemaker
+from flask import Flask, jsonify, request
+
 import fbp
-
+import nodemaker
 from fbp.port import Port
 
 app = Flask(__name__, static_url_path="")
@@ -71,6 +70,33 @@ def _inset_node(parent, node, path):
                 parent["children"].append(item)
                 _inset_node(item, node, path[1:])
     return
+
+
+@app.route('/packages', methods=['GET', 'POST'])
+def packages():
+    """Packages list resource endpoint"""
+    if request.method == 'POST':
+        packages = request.json['packages']
+        try:
+            # Uninstall packages first
+            remove_command = [sys.executable, '-m', 'pip', 'uninstall', '-y']
+            remove_command.extend(packages)
+            subprocess.check_call(remove_command)
+            # Then install
+            install_command = [sys.executable, '-m', 'pip', 'install', '-U']
+            install_command.extend(packages)
+            subprocess.check_call(install_command)
+        except subprocess.CalledProcessError as exc:
+            return jsonify({'error': 'Pip failed with code {}'.format(exc.returncode)}), 500
+
+        return jsonify({'msg': 'Success'})
+
+    try:
+        reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze'])
+    except subprocess.CalledProcessError as exc:
+        return jsonify({'error': 'Pip failed with code {}!'.format(exc.returncode)}), 500
+
+    return jsonify({'freeze': reqs})
 
 
 @app.route("/nodes", methods=['GET', 'POST'])
@@ -177,7 +203,7 @@ def load_node_spec():
     records = []
     for file in os.listdir('node_specs'):
         if file.endswith('.py') and file != '__init__.py':
-            with open('node_specs' + os.path.sep + file)as f:
+            with open('node_specs' + os.path.sep + file) as f:
                 spec = nodemaker.create_node_spec(f.read())
                 records.append(json.dumps(spec))
 
