@@ -164,12 +164,9 @@ def get_flow(id):
 
 @app.route("/runflow", methods=['POST'])
 def runflow():
-    try:
-        data = request.get_json()
-        print(json.dumps(data))
-        return jsonify(fbp.run_flow(data))
-    except Exception as e:
-        return json.dumps({"error": str(e)}), 500
+    data = request.get_json()
+    print(json.dumps(data))
+    return jsonify(fbp.run_flow(data))
 
 
 @app.route("/dumprepo", methods=['POST'])
