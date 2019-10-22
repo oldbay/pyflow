@@ -4,13 +4,14 @@ from multiprocessing.managers import BaseManager
 import sys
 import json
 from fbp.node import Node
-
+from src.fbp.publisher import Publisher, RabbitPublisher
 
 EXEC_MODE_BATCH = "batch"
 EXEC_MODE_STREAMING = "streaming"
 
 
 class Path(object):
+
     def __init__(self, source_node, source_port, target_node, target_port):
         self._name = source_node.id + ":" + source_port.name + \
             "~" + target_node.id + ":" + target_port.name
@@ -45,6 +46,7 @@ def _gen_lable(node, port):
 
 
 class FlowStates(object):
+
     def __init__(self):
         self._result = list()
         self._complete = False
@@ -94,12 +96,10 @@ class Flow(object):
 
         # TODO : link should do data transfer if source port contains data
         if self._nodes.get(source_node_id) is None:
-            raise Exception(
-                "The source node {} is not in the flow".format(source_node_id))
+            raise Exception("The source node {} is not in the flow".format(source_node_id))
 
         if self._nodes.get(target_node_id) is None:
-            raise Exception(
-                "The target node {} is not in the flow".format(target_node_id))
+            raise Exception("The target node {} is not in the flow".format(target_node_id))
 
         source_node = self._nodes.get(source_node_id)
         target_node = self._nodes.get(target_node_id)
@@ -107,12 +107,10 @@ class Flow(object):
         target_port = target_node.get_port(target_port_name, "in")
 
         if source_port is None:
-            raise Exception("The source port {} is not in the node {}".format(
-                source_port_name, source_node_id))
+            raise Exception("The source port {} is not in the node {}".format(source_port_name, source_node_id))
 
         if target_port is None:
-            raise Exception("The target port {} is not in the node {}".format(
-                target_port_name, target_node_id))
+            raise Exception("The target port {} is not in the node {}".format(target_port_name, target_node_id))
 
         # source lable is not used
         source_label = _gen_lable(source_node, source_port)
@@ -120,15 +118,13 @@ class Flow(object):
 
         link_to_target = self._links.get(target_label)
         if link_to_target is not None:
-            raise Exception(
-                "Link to target port {} already exist, unlink first!".format(target_label))
+            raise Exception("Link to target port {} already exist, unlink first!".format(target_label))
 
         # bi-directional link the port
         target_port.point_from(source_port)
         source_port.point_to(target_port)
 
-        self._links[target_label] = Path(
-            source_node, source_port, target_node, target_port)
+        self._links[target_label] = Path(source_node, source_port, target_node, target_port)
 
     def unlink(self, target_node_id, target_port_name):
         target_label = target_node_id + ":" + target_port_name
@@ -146,7 +142,7 @@ class Flow(object):
         children = []
         for p in in_ports:
             link_to_p = self._links.get(_gen_lable(target_node, p))
-            if link_to_p is not None :
+            if link_to_p is not None:
                 children.append(link_to_p.source_node)
                 if link_to_p.source_node in source_nodes:
                     source_nodes.remove(link_to_p.source_node)
@@ -166,7 +162,7 @@ class Flow(object):
             children = new_children
             new_children = []
 
-    def _run_batch(self, end_node, stat):
+    def _run_batch(self, end_node, stat, publisher: Publisher):
         nodemap = [end_node]
         self._find_source_nodes(end_node, nodemap)
         while True:
@@ -174,7 +170,7 @@ class Flow(object):
                 break
             anode = nodemap.pop()
             node_value = anode.get_node_value()
-            
+
             dep_nodes = list()
             find_failure = False
             for n in self._find_dependant_nodes(anode, dep_nodes):
@@ -190,15 +186,20 @@ class Flow(object):
                 break
 
             try:
+                publisher.pub_start({'node_name': anode.name})
                 anode.run()
                 node_value = anode.get_node_value()
+                publisher.pub_finish({'node_name': anode.name, 'value': node_value})
             except Exception as e:
                 node_value = anode.get_node_value()
                 node_value["status"] = "fail"
                 node_value["error"] = str(e)
-            finally :
+                publisher.pub_error(str(e), {'node_name': anode.name})
+            finally:
                 stat.append_stat(node_value)
 
+        # Base class doesn't have this method, so _run_batch actually knows it's provided with RabbitPublisher
+        publisher.close()
         stat.set_stat(True)
 
     def _run_streaming(self, end_node):
@@ -212,7 +213,13 @@ class Flow(object):
             manager.start()
             stat = manager.FlowStates()
 
-            p = Process(target=self._run_batch, args=(end_node, stat))
+            rmq_publisher = RabbitPublisher(username='admin',
+                                            password='admin',
+                                            host='10.100.8.66',
+                                            port=5672,
+                                            exchange='core_info')
+
+            p = Process(target=self._run_batch, args=(end_node, stat, rmq_publisher))
             p.start()
             return stat
         elif self._mode == EXEC_MODE_STREAMING:
