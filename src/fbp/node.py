@@ -35,6 +35,7 @@ class Node(object):
         code = spec.get("func")
         # code = code.replace('"', '\"')
         if is_valid_python(code):
+            print('Box name: ' + name)
             # exec(compile(ast.parse(spec.get("func")), "fakeobj", "exec"))
             executed = exec(code, func_)
             # target_func = [func_[x] for x in list(func_.keys()) if x == "func" and callable(func_[x])][0]

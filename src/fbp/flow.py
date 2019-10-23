@@ -4,7 +4,7 @@ from multiprocessing.managers import BaseManager
 import sys
 import json
 from fbp.node import Node
-from src.fbp.publisher import Publisher, RabbitPublisher
+from fbp.publisher import Publisher, RabbitPublisher
 
 EXEC_MODE_BATCH = "batch"
 EXEC_MODE_STREAMING = "streaming"

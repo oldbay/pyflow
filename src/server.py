@@ -79,9 +79,9 @@ def packages():
         packages = request.json['packages']
         try:
             # Uninstall packages first
-            remove_command = [sys.executable, '-m', 'pip', 'uninstall', '-y']
-            remove_command.extend(packages)
-            subprocess.check_call(remove_command)
+            # remove_command = [sys.executable, '-m', 'pip', 'uninstall', '-y']
+            # remove_command.extend(packages)
+            # subprocess.check_call(remove_command)
             # Then install
             install_command = [sys.executable, '-m', 'pip', 'install', '-U']
             install_command.extend(packages)
@@ -221,4 +221,4 @@ def init():
 
 if __name__ == "__main__":
     init()
-    app.run(host="0.0.0.0", threaded=True)
+    app.run(host="0.0.0.0", port=4999, threaded=True)
