@@ -198,8 +198,6 @@ class Flow(object):
             finally:
                 stat.append_stat(node_value)
 
-        # Base class doesn't have this method, so _run_batch actually knows it's provided with RabbitPublisher
-        publisher.close()
         stat.set_stat(True)
 
     def _run_streaming(self, end_node):

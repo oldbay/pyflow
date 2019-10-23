@@ -54,16 +54,12 @@ class RabbitPublisher(Publisher):
 
     def __init__(self, **kwargs):
         credentials = pika.PlainCredentials(kwargs['username'], kwargs['password'])
-        parameters = pika.ConnectionParameters(host=kwargs['host'], port=kwargs['port'], credentials=credentials)
-        self.connection = pika.BlockingConnection(parameters)
-        self.channel = self.connection.channel()
+        self.connection_parameters = pika.ConnectionParameters(host=kwargs['host'],
+                                                               port=kwargs['port'],
+                                                               credentials=credentials)
         # Publisher expects that the target exchange is fanout so that several queues could be bound to it
         self.exchange = kwargs['exchange']
         self.metadata = kwargs.get('metadata')
-
-    def close(self):
-        """Close RabbitMQ connection and finalize object"""
-        self.connection.close()
 
     def pub_start(self, data):
         """Publishes start event to RabbitMQ attaching additional data to it
@@ -108,7 +104,13 @@ class RabbitPublisher(Publisher):
 
     def pub_event(self, event_message):
         """Boilerplate code for putting event into RabbitMQ"""
+        connection = pika.BlockingConnection(self.connection_parameters)
+        channel = connection.channel()
+
         if self.metadata is not None:
             event_message['metadata'] = self.metadata
+
         json_message = json.dumps(event_message, separators=(',', ':'))
-        self.channel.basic_publish(self.exchange, '', bytes(json_message, encoding='utf-8'))
+        channel.basic_publish(self.exchange, '', bytes(json_message, encoding='utf-8'))
+
+        connection.close()
