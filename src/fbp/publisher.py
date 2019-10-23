@@ -47,7 +47,8 @@ class RabbitPublisher(Publisher):
 
     Args:
         **kwargs: Configuration for initializing RabbitMQ connection. Must include ``username``, ``password``, ``host``,
-            ``port`` and ``exchange``.
+            ``port`` and ``exchange``. May include ``metadata``. Metadata will be appended to every event if it is
+            provided.
 
     """
 
@@ -58,6 +59,7 @@ class RabbitPublisher(Publisher):
         self.channel = self.connection.channel()
         # Publisher expects that the target exchange is fanout so that several queues could be bound to it
         self.exchange = kwargs['exchange']
+        self.metadata = kwargs.get('metadata')
 
     def close(self):
         """Close RabbitMQ connection and finalize object"""
@@ -106,5 +108,7 @@ class RabbitPublisher(Publisher):
 
     def pub_event(self, event_message):
         """Boilerplate code for putting event into RabbitMQ"""
+        if self.metadata is not None:
+            event_message['metadata'] = self.metadata
         json_message = json.dumps(event_message, separators=(',', ':'))
         self.channel.basic_publish(self.exchange, '', bytes(json_message, encoding='utf-8'))

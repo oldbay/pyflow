@@ -205,7 +205,7 @@ class Flow(object):
     def _run_streaming(self, end_node):
         pass
 
-    def run(self, end_node):
+    def run(self, end_node, metadata=None):
         if self._mode == EXEC_MODE_BATCH:
             BaseManager.register('FlowStates', FlowStates)
             BaseManager.register('Node', Node)
