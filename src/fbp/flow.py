@@ -1,4 +1,5 @@
 """Core Class for Flow."""
+import datetime
 from multiprocessing import Process, Manager
 from multiprocessing.managers import BaseManager
 import sys
@@ -186,15 +187,20 @@ class Flow(object):
                 break
 
             try:
-                publisher.pub_start({'node_name': anode.name})
+                event_data = {
+                    'node_name': anode.name,
+                    'time': str(datetime.datetime.now()),
+                }
+                publisher.pub_start(event_data)
                 anode.run()
                 node_value = anode.get_node_value()
-                publisher.pub_finish({'node_name': anode.name, 'value': node_value})
+                event_data['value'] = node_value
+                publisher.pub_finish(event_data)
             except Exception as e:
                 node_value = anode.get_node_value()
                 node_value["status"] = "fail"
                 node_value["error"] = str(e)
-                publisher.pub_error(str(e), {'node_name': anode.name})
+                publisher.pub_error(str(e), event_data)
             finally:
                 stat.append_stat(node_value)
 
