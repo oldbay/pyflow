@@ -62,7 +62,10 @@ def _run_flow(flow_spec):
 
         aflow.link(source[0], source[1], target[0], target[1])
 
-    stats = aflow.run(end_node)
+    metadata = dict()
+    if 'processor_name' in flow_spec_obj:
+        metadata['processor_name'] = flow_spec_obj['processor_name']
+    stats = aflow.run(end_node, metadata=metadata)
 
     return stats
 
