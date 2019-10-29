@@ -10,7 +10,6 @@ from fbp.publisher import Publisher, RabbitPublisher
 EXEC_MODE_BATCH = "batch"
 EXEC_MODE_STREAMING = "streaming"
 
-
 class Path(object):
 
     def __init__(self, source_node, source_port, target_node, target_port):
@@ -192,7 +191,13 @@ class Flow(object):
                     'time': str(datetime.datetime.now()),
                 }
                 publisher.pub_start(event_data)
-                anode.run()
+                additional_property_dict = {}
+                # TRY get data from decorator
+                try:
+
+                    anode.run()
+                except Exception:
+                    anode.run()
                 node_value = anode.get_node_value()
                 event_data['value'] = node_value
                 publisher.pub_finish(event_data)

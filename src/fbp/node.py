@@ -25,11 +25,12 @@ class Node(object):
 
     widgets = None
 
-    def __init__(self, id, name, spec):
+    def __init__(self, id, name, spec, property_dict={}):
         self._id = id
         self._name = name
         self._spec = spec
         self._port_spec = spec.get("port")
+        self.box_property = property_dict
         # Tricky and Non-Secure eval
         func_ = locals()
         code = spec.get("func")
