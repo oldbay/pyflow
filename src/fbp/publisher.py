@@ -70,8 +70,9 @@ class RabbitPublisher(Publisher):
         """
         message = {
             'event_type': 'start',
-            'data': data,
+            'data': data['value']['outputs'],
         }
+        print(message)
         self.pub_event(message)
 
     def pub_finish(self, data):
