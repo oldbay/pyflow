@@ -179,8 +179,8 @@ class Node(object):
         node = dict()
         node["id"] = self._id
         node["name"] = self._name
-        node["inputs"] = self._inputports
-        node["outputs"] = self._outputports
+        node["inputs"] = {k: v.get_value() for k, v in self._inputports.items()}
+        node["outputs"] = {k: v.get_value() for k, v in self._outputports.items()}
         node["status"] = self._status
 
         node["error"] = str(self._error)
