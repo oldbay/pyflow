@@ -70,6 +70,8 @@ class RabbitPublisher(Publisher):
         """
         message = {
             'event_type': 'start',
+            'node_name': data['node_name'],
+            'time': data['time'],
         }
         self.pub_event(message)
 
@@ -83,6 +85,8 @@ class RabbitPublisher(Publisher):
         message = {
             'event_type': 'finish',
             'data': data['value']['outputs'],
+            'node_name': data['node_name'],
+            'time': data['time'],
         }
         print(message)
         self.pub_event(message)
@@ -98,7 +102,8 @@ class RabbitPublisher(Publisher):
         message = {
             'event_type': 'error',
             'error': str(error),
-            'data': data,
+            'node_name': data['node_name'],
+            'time': data['time'],
         }
         self.pub_event(message)
 
