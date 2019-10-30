@@ -226,7 +226,8 @@ class Flow(object):
                                             password='admin',
                                             host='10.100.8.66',
                                             port=5672,
-                                            exchange='core_events')
+                                            exchange='core_events',
+                                            metadata=metadata)
 
             p = Process(target=self._run_batch, args=(end_node, stat, rmq_publisher))
             p.start()
