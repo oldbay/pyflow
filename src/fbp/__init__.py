@@ -65,6 +65,8 @@ def _run_flow(flow_spec):
     metadata = dict()
     if 'processor_name' in flow_spec_obj:
         metadata['processor_name'] = flow_spec_obj['processor_name']
+    if 'processor_id' in flow_spec_obj:
+        metadata['processor_id'] = flow_spec_obj['processor_id']
     stats = aflow.run(end_node, metadata=metadata)
 
     return stats
