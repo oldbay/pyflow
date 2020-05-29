@@ -53,6 +53,9 @@ class RabbitPublisher(Publisher):
     """
 
     def __init__(self, **kwargs):
+        print (kwargs)
+        print (kwargs['host'])
+        print (kwargs['port'])
         credentials = pika.PlainCredentials(kwargs['username'], kwargs['password'])
         self.connection_parameters = pika.ConnectionParameters(host=kwargs['host'],
                                                                port=kwargs['port'],

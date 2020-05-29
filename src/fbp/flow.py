@@ -222,11 +222,11 @@ class Flow(object):
             manager.start()
             stat = manager.FlowStates()
 
-            rmq_publisher = RabbitPublisher(username='admin',
-                                            password='admin',
-                                            host='10.100.8.66',
+            rmq_publisher = RabbitPublisher(username='guest',
+                                            password='guest',
+                                            host='127.0.0.1',
                                             port=5672,
-                                            exchange='core_events',
+                                            exchange='',
                                             metadata=metadata)
 
             p = Process(target=self._run_batch, args=(end_node, stat, rmq_publisher))

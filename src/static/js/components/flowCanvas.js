@@ -27,7 +27,8 @@ define(["model/flow", "util"], function(Flow, Util) {
             },
             isSource: true,
             maxConnections: -1,
-            connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+            // connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+            connector : [ "Bezier", { curviness: 150 } ],
             connectorStyle: connectorPaintStyle,
             hoverPaintStyle: endpointHoverStyle,
             connectorHoverStyle: connectorHoverStyle,
@@ -61,7 +62,8 @@ define(["model/flow", "util"], function(Flow, Util) {
 
     var Canvas = function Canvas(rootId, nodeSpec, nodeInspector) {
         this._instance = jsPlumb.getInstance({
-            Connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
+            Connector : [ "Bezier", { curviness: 150 } ],
+            // Connector: ["Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true }],
             DragOptions: { cursor: "pointer", zIndex: 2000 },
             Container: FLOW_PANEL_ID
         });
@@ -251,6 +253,8 @@ define(["model/flow", "util"], function(Flow, Util) {
     Canvas.prototype._addNode = function(parentId, nodeId, nodeSpec, position) {
         var me = this;
         var panel = d3.select("#" + parentId);
+        //find height for node (int px to config!)
+        var node_height = (Math.max(nodeSpec.port.input.length, nodeSpec.port.output.length) * 25)+20;
         //construct the node data copied from the nodeSpec
         var data = {};
         $.extend(data, nodeSpec, { nodeId: nodeId });
@@ -258,6 +262,7 @@ define(["model/flow", "util"], function(Flow, Util) {
         panel.append("div").datum(data)
             .style("top", position.y)
             .style("left", position.x)
+            .style("height",node_height + "px")
             .classed("pyflownode", true)
             .attr("id", function(d) {
                 return d.nodeId;
